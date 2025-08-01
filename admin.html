@@ -1,6 +1,103 @@
-<script>
-  const auth = JSON.parse(localStorage.getItem("auth"));
-  if (!auth || auth.role !== "admin") {
-    window.location.href = "login.html";
-  }
-</script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Click Suply</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Painel do Administrador</h2>
+
+  <button onclick="logout()">Sair</button>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Usuário</th>
+        <th>Perfil</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+
+  <h3>Editar Usuário</h3>
+  <form id="editForm" style="display: none;">
+    <input type="hidden" id="editIndex" />
+    <input type="text" id="editUsername" placeholder="Novo usuário" required />
+    <input type="password" id="editPassword" placeholder="Nova senha" required />
+    <select id="editRole" required>
+      <option value="user">Usuário</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <button type="submit">Salvar Alterações</button>
+  </form>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("auth"));
+    if (!auth || auth.role !== "admin") {
+      window.location.href = "login.html";
+    }
+
+    const userTable = document.getElementById("userTable");
+    const editForm = document.getElementById("editForm");
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    function renderUsers() {
+      users = JSON.parse(localStorage.getItem("users")) || [];
+      userTable.innerHTML = "";
+
+      users.forEach((user, index) => {
+        userTable.innerHTML += `
+          <tr>
+            <td>${user.username}</td>
+            <td>${user.role}</td>
+            <td>
+              <button onclick="editUser(${index})">Editar</button>
+              <button onclick="deleteUser(${index})">Excluir</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function editUser(index) {
+      const user = users[index];
+      document.getElementById("editIndex").value = index;
+      document.getElementById("editUsername").value = user.username;
+      document.getElementById("editPassword").value = user.password;
+      document.getElementById("editRole").value = user.role;
+      editForm.style.display = "block";
+    }
+
+    function deleteUser(index) {
+      if (confirm("Tem certeza que deseja excluir este usuário?")) {
+        users.splice(index, 1);
+        localStorage.setItem("users", JSON.stringify(users));
+        renderUsers();
+      }
+    }
+
+    editForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const index = document.getElementById("editIndex").value;
+      const username = document.getElementById("editUsername").value;
+      const password = document.getElementById("editPassword").value;
+      const role = document.getElementById("editRole").value;
+
+      users[index] = { username, password, role };
+      localStorage.setItem("users", JSON.stringify(users));
+      editForm.reset();
+      editForm.style.display = "none";
+      renderUsers();
+    });
+
+    function logout() {
+      localStorage.removeItem("auth");
+      window.location.href = "login.html";
+    }
+
+    renderUsers();
+  </script>
+</body>
+</html>
