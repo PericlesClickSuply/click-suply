@@ -21,28 +21,41 @@ function logout() {
 
 function setupLogin() {
   const form = document.getElementById("loginForm");
-  if (!form) return;
+  if (!form) {
+    console.log("setupLogin: formulário não encontrado");
+    return;
+  }
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
     const username = form.elements["username"].value.trim();
     const password = form.elements["password"].value;
 
+    console.log("Tentando login com:", { username, password });
+
     const users = JSON.parse(localStorage.getItem("users")) || [];
+    console.log("Usuários cadastrados:", users);
+
     const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
+      console.log("Usuário encontrado:", user);
       localStorage.setItem("auth", JSON.stringify(user));
       if (user.role === "admin") {
+        console.log("Redirecionando para admin.html");
         window.location.href = "admin.html";
       } else {
+        console.log("Redirecionando para index.html");
         window.location.href = "index.html";
       }
     } else {
+      console.log("Usuário ou senha inválidos.");
       alert("Usuário ou senha inválidos.");
     }
   });
 }
+
 
 function setupRegister() {
   const form = document.getElementById("registerForm");
