@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Click Suply</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Login - Click Suply</h2>
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Usuário" required />
+    <input type="password" id="password" placeholder="Senha" required />
+    <button type="submit">Entrar</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const user = form.username.value;
+      const pass = form.password.value;
+
+      const storedUser = "admin";       // usuário fixo (pode mudar)
+      const storedPass = "123456";      // senha fixa (pode mudar)
+
+      if (user === storedUser && pass === storedPass) {
+        localStorage.setItem("auth", "true");
+        window.location.href = "index.html";
+      } else {
+        alert("Usuário ou senha inválidos.");
+      }
+    });
+  </script>
+</body>
+</html>
