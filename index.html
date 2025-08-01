@@ -1,4 +1,10 @@
 <script>
+  const auth = JSON.parse(localStorage.getItem("auth"));
+  if (!auth || auth.role !== "user") {
+    window.location.href = "login.html";
+  }
+</script>
+<script>
   if (localStorage.getItem("auth") !== "true") {
     window.location.href = "login.html";
   }
