@@ -1,25 +1,20 @@
-<form id="loginForm">...</form>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Click Suply</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-login">
+  <h2>Login - Click Suply</h2>
+  <form id="loginForm">
+    <input type="text" id="username" name="username" placeholder="Usuário" required />
+    <input type="password" id="password" name="password" placeholder="Senha" required />
+    <button type="submit">Entrar</button>
+  </form>
+  <p>Não tem conta? <a href="register.html">Cadastre-se</a></p>
 
-<script>
-  const form = document.getElementById("loginForm");
+  <script src="script.js"></script>
+</body>
+</html>
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const username = form.username.value;
-    const password = form.password.value;
-
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find(u => u.username === username && u.password === password);
-
-    if (user) {
-      localStorage.setItem("auth", JSON.stringify(user));
-      if (user.role === "admin") {
-        window.location.href = "admin.html";
-      } else {
-        window.location.href = "index.html";
-      }
-    } else {
-      alert("Usuário ou senha inválidos.");
-    }
-  });
-</script>
