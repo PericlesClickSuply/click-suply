@@ -146,3 +146,229 @@ function exportarCSV() {
 
   document.getElementById("output").textContent = csv;
 }
+// Controle das abas
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    document.querySelectorAll(".tab-content").forEach(sec => sec.classList.remove("active"));
+    const tabId = btn.getAttribute("data-tab");
+    document.getElementById(tabId).classList.add("active");
+  });
+});
+
+// Dados armazenados
+let materiais = JSON.parse(localStorage.getItem("materiais")) || [];
+let obras = JSON.parse(localStorage.getItem("obras")) || [];
+let requisicoes = JSON.parse(localStorage.getItem("requisicoes")) || [];
+
+// Atualiza UI
+function atualizarListaMateriais() {
+  const ul = document.getElementById("listaMateriais");
+  ul.innerHTML = "";
+  materiais.forEach((mat, i) => {
+    const li = document.createElement("li");
+    li.textContent = mat;
+    const btnDel = document.createElement("button");
+    btnDel.textContent = "Excluir";
+    btnDel.onclick = () => {
+      materiais.splice(i, 1);
+      salvarMateriais();
+      atualizarListaMateriais();
+      atualizarSelectMateriais();
+    };
+    li.appendChild(btnDel);
+    ul.appendChild(li);
+  });
+}
+
+function salvarMateriais() {
+  localStorage.setItem("materiais", JSON.stringify(materiais));
+}
+
+function adicionarMaterial() {
+  const input = document.getElementById("materialNome");
+  const nome = input.value.trim();
+  if (!nome) {
+    alert("Informe o nome do material");
+    return;
+  }
+  materiais.push(nome);
+  salvarMateriais();
+  atualizarListaMateriais();
+  atualizarSelectMateriais();
+  input.value = "";
+}
+
+// Obras
+function atualizarListaObras() {
+  const ul = document.getElementById("listaObras");
+  ul.innerHTML = "";
+  obras.forEach((obra, i) => {
+    const li = document.createElement("li");
+    li.textContent = obra;
+    const btnDel = document.createElement("button");
+    btnDel.textContent = "Excluir";
+    btnDel.onclick = () => {
+      obras.splice(i, 1);
+      salvarObras();
+      atualizarListaObras();
+      atualizarSelectObras();
+    };
+    li.appendChild(btnDel);
+    ul.appendChild(li);
+  });
+}
+
+function salvarObras() {
+  localStorage.setItem("obras", JSON.stringify(obras));
+}
+
+function adicionarObra() {
+  const input = document.getElementById("obraCodigo");
+  const codigo = input.value.trim();
+  if (!codigo) {
+    alert("Informe o código da obra");
+    return;
+  }
+  obras.push(codigo);
+  salvarObras();
+  atualizarListaObras();
+  atualizarSelectObras();
+  input.value = "";
+}
+
+// Selects para nova requisição
+function atualizarSelectMateriais() {
+  const sel = document.getElementById("selMaterial");
+  sel.innerHTML = "";
+  materiais.forEach(mat => {
+    const opt = document.createElement("option");
+    opt.value = mat;
+    opt.textContent = mat;
+    sel.appendChild(opt);
+  });
+}
+
+function atualizarSelectObras() {
+  const sel = document.getElementById("selObra");
+  sel.innerHTML = "";
+  obras.forEach(obra => {
+    const opt = document.createElement("option");
+    opt.value = obra;
+    opt.textContent = obra;
+    sel.appendChild(opt);
+  });
+}
+
+// Requisições
+let itensRequisicao = [];
+
+function adicionarItemRequisicao() {
+  const selMaterial = document.getElementById("selMaterial");
+  const quantidadeInput = document.getElementById("quantidade");
+  const material = selMaterial.value;
+  const quantidade = parseFloat(quantidadeInput.value);
+  if (!material) {
+    alert("Selecione um material");
+    return;
+  }
+  if (!quantidade || quantidade <= 0) {
+    alert("Informe uma quantidade válida");
+    return;
+  }
+  itensRequisicao.push({ material, quantidade });
+  atualizarTabelaItens();
+  quantidadeInput.value = "";
+}
+
+function atualizarTabelaItens() {
+  const tbody = document.querySelector("#tabelaItens tbody");
+  tbody.innerHTML = "";
+  itensRequisicao.forEach((item, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.material}</td>
+      <td>${item.quantidade}</td>
+      <td><button onclick="removerItemRequisicao(${i})">Remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function removerItemRequisicao(index) {
+  itensRequisicao.splice(index, 1);
+  atualizarTabelaItens();
+}
+
+function salvarRequisicao() {
+  const selObra = document.getElementById("selObra");
+  const obra = selObra.value;
+  if (!obra) {
+    alert("Selecione a obra");
+    return;
+  }
+  if (itensRequisicao.length === 0) {
+    alert("Adicione ao menos um item na requisição");
+    return;
+  }
+
+  const data = new Date().toLocaleDateString();
+  const numero = getProximoNumeroRequisicao(obra);
+
+  const novaReq = {
+    obra,
+    numero,
+    data,
+    itens: [...itensRequisicao]
+  };
+
+  requisicoes.push(novaReq);
+  salvarRequisicoes();
+  atualizarListaRequisicoes();
+
+  // Limpa para nova requisição
+  itensRequisicao = [];
+  atualizarTabelaItens();
+  alert(`Requisição RM-${obra}-${String(numero).padStart(3, "0")} salva!`);
+}
+
+function getProximoNumeroRequisicao(obra) {
+  const chavesObra = requisicoes.filter(r => r.obra === obra);
+  if (chavesObra.length === 0) return 1;
+  const maior = Math.max(...chavesObra.map(r => r.numero));
+  return maior + 1;
+}
+
+function salvarRequisicoes() {
+  localStorage.setItem("requisicoes", JSON.stringify(requisicoes));
+}
+
+function atualizarListaRequisicoes() {
+  const ul = document.getElementById("listaRequisicoes");
+  ul.innerHTML = "";
+  requisicoes.forEach(req => {
+    const li = document.createElement("li");
+    li.textContent = `RM-${req.obra}-${String(req.numero).padStart(3, "0")} - ${req.data} (${req.itens.length} itens)`;
+    ul.appendChild(li);
+  });
+}
+
+// Inicialização ao carregar a página
+document.addEventListener("DOMContentLoaded", () => {
+  atualizarListaMateriais();
+  atualizarListaObras();
+  atualizarListaRequisicoes();
+  atualizarSelectMateriais();
+  atualizarSelectObras();
+
+  // Logout
+  const logoutBtn = document.getElementById("btnLogout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("auth");
+      window.location.href = "login.html";
+    });
+  }
+});
