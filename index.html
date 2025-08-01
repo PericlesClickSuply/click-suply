@@ -85,3 +85,9 @@
     window.location.href = "login.html";
   }
 </script>
+<script>
+  const auth = JSON.parse(localStorage.getItem("auth"));
+  if (!auth || auth.role !== "admin") {
+    window.location.href = "login.html";
+  }
+</script>
