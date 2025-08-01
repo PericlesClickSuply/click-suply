@@ -1,35 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Login - Click Suply</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <h2>Login - Click Suply</h2>
-  <form id="loginForm">
-    <input type="text" id="username" placeholder="Usuário" required />
-    <input type="password" id="password" placeholder="Senha" required />
-    <button type="submit">Entrar</button>
-  </form>
+<!-- Igual ao anterior, com ajustes -->
+<form id="loginForm">...</form>
 
-  <script>
-    const form = document.getElementById("loginForm");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const user = form.username.value;
-      const pass = form.password.value;
+<script>
+  const form = document.getElementById("loginForm");
 
-      const storedUser = "admin";       // usuário fixo (pode mudar)
-      const storedPass = "123456";      // senha fixa (pode mudar)
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = form.username.value;
+    const password = form.password.value;
 
-      if (user === storedUser && pass === storedPass) {
-        localStorage.setItem("auth", "true");
-        window.location.href = "index.html";
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+      localStorage.setItem("auth", JSON.stringify(user));
+      if (user.role === "admin") {
+        window.location.href = "admin.html";
       } else {
-        alert("Usuário ou senha inválidos.");
+        window.location.href = "index.html";
       }
-    });
-  </script>
-</body>
-</html>
+    } else {
+      alert("Usuário ou senha inválidos.");
+    }
+  });
+</script>
