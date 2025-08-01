@@ -25,14 +25,14 @@ function setupLogin() {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const username = form.username.value.trim();
-    const password = form.password.value;
+    const username = form.elements["username"].value.trim();
+    const password = form.elements["password"].value;
 
-    const users = getUsers();
+    const users = JSON.parse(localStorage.getItem("users")) || [];
     const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
-      setAuth(user);
+      localStorage.setItem("auth", JSON.stringify(user));
       if (user.role === "admin") {
         window.location.href = "admin.html";
       } else {
