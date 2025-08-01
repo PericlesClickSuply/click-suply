@@ -1,197 +1,177 @@
-let materiais = JSON.parse(localStorage.getItem("materiais") || "[]");
-let obras = JSON.parse(localStorage.getItem("obras") || "[]");
-let requisicoes = JSON.parse(localStorage.getItem("requisicoes") || "[]");
-let requisicaoAtual = [];
-let requisicaoEditIndex = null;
+function getUsers() {
+  return JSON.parse(localStorage.getItem("users")) || [];
+}
 
-function showTab(tabId) {
-  document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
-  document.querySelectorAll("nav button").forEach((btn) => btn.classList.remove("active"));
-  document.getElementById(tabId).classList.add("active");
-  event.target.classList.add("active");
+function setUsers(users) {
+  localStorage.setItem("users", JSON.stringify(users));
+}
 
-  if (tabId === "catalogo") renderMateriais();
-  if (tabId === "obras") renderObras();
-  if (tabId === "historico") renderHistorico();
-  if (tabId === "requisicao") {
-    renderSelectObras();
-    renderSelectMateriais();
-    renderTabelaRequisicao();
+function getAuth() {
+  return JSON.parse(localStorage.getItem("auth"));
+}
+
+function setAuth(user) {
+  localStorage.setItem("auth", JSON.stringify(user));
+}
+
+function logout() {
+  localStorage.removeItem("auth");
+  window.location.href = "login.html";
+}
+
+function setupLogin() {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = form.username.value.trim();
+    const password = form.password.value;
+
+    const users = getUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+      setAuth(user);
+      if (user.role === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    } else {
+      alert("Usuário ou senha inválidos.");
+    }
+  });
+}
+
+function setupRegister() {
+  const form = document.getElementById("registerForm");
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = form.username.value.trim();
+    const password = form.password.value;
+    const role = form.role.value;
+
+    if (!username || !password) {
+      alert("Preencha usuário e senha.");
+      return;
+    }
+
+    let users = getUsers();
+
+    if (users.find(u => u.username === username)) {
+      alert("Usuário já existe.");
+      return;
+    }
+
+    users.push({ username, password, role });
+    setUsers(users);
+    alert("Usuário cadastrado com sucesso!");
+    window.location.href = "login.html";
+  });
+}
+
+function protectPage(roleNeeded) {
+  const auth = getAuth();
+  if (!auth || auth.role !== roleNeeded) {
+    window.location.href = "login.html";
   }
 }
 
-function cadastrarMaterial() {
-  const desc = document.getElementById("descMaterial").value.trim();
-  const unid = document.getElementById("unidMaterial").value.trim();
-  if (!desc || !unid) {
-    alert("Preencha descrição e unidade do material.");
-    return;
-  }
-  materiais.push({ descricao: desc, unidade: unid });
-  localStorage.setItem("materiais", JSON.stringify(materiais));
-  document.getElementById("descMaterial").value = "";
-  document.getElementById("unidMaterial").value = "";
-  renderMateriais();
-  renderSelectMateriais();
-  alert("Material cadastrado com sucesso!");
-}
+function setupAdminPanel() {
+  const userTable = document.getElementById("userTable");
+  const editForm = document.getElementById("editForm");
+  if (!userTable || !editForm) return;
 
-function renderMateriais() {
-  const ul = document.getElementById("listaMateriais");
-  ul.innerHTML = materiais.map((m) => `<li>${m.descricao} (${m.unidade})</li>`).join("");
-}
+  let users = getUsers();
 
-function cadastrarObra() {
-  const nome = document.getElementById("nomeObra").value.trim();
-  if (!nome) {
-    alert("Informe o nome da obra.");
-    return;
-  }
-  const codigo = `OB-${String(obras.length + 1).padStart(3, "0")}`;
-  obras.push({ nome, codigo });
-  localStorage.setItem("obras", JSON.stringify(obras));
-  document.getElementById("nomeObra").value = "";
-  renderObras();
-  renderSelectObras();
-  alert("Obra cadastrada com sucesso!");
-}
-
-function renderObras() {
-  const ul = document.getElementById("listaObras");
-  ul.innerHTML = obras.map((o) => `<li>${o.codigo} - ${o.nome}</li>`).join("");
-}
-
-function renderSelectMateriais() {
-  const sel = document.getElementById("materialSelect");
-  sel.innerHTML = materiais
-    .map((m, i) => `<option value="${i}">${m.descricao} (${m.unidade})</option>`)
-    .join("");
-}
-
-function renderSelectObras() {
-  const sel = document.getElementById("obraSelect");
-  sel.innerHTML = obras
-    .map((o, i) => `<option value="${i}">${o.codigo} - ${o.nome}</option>`)
-    .join("");
-}
-
-function adicionarItem() {
-  const materialIndex = document.getElementById("materialSelect").value;
-  const qtd = document.getElementById("quantidadeInput").value;
-  if (materialIndex === "" || qtd === "" || qtd <= 0) {
-    alert("Selecione o material e informe uma quantidade válida.");
-    return;
-  }
-  const mat = materiais[materialIndex];
-  requisicaoAtual.push({ descricao: mat.descricao, unidade: mat.unidade, quantidade: qtd });
-  renderTabelaRequisicao();
-  document.getElementById("quantidadeInput").value = "";
-}
-
-function renderTabelaRequisicao() {
-  const tbody = document.querySelector("#tabelaRequisicao tbody");
-  tbody.innerHTML = requisicaoAtual
-    .map(
-      (item, i) => `
-    <tr>
-      <td>${item.descricao}</td>
-      <td>${item.unidade}</td>
-      <td>${item.quantidade}</td>
-      <td><button class="small" onclick="removerItem(${i})">Remover</button></td>
-    </tr>`
-    )
-    .join("");
-}
-
-function removerItem(i) {
-  requisicaoAtual.splice(i, 1);
-  renderTabelaRequisicao();
-}
-
-function salvarRequisicao() {
-  const obraIndex = document.getElementById("obraSelect").value;
-  if (obraIndex === "") {
-    alert("Por favor, selecione uma obra.");
-    return;
-  }
-  if (requisicaoAtual.length === 0) {
-    alert("Adicione pelo menos um item na requisição.");
-    return;
-  }
-  const obra = obras[obraIndex];
-  let requisicoesSalvas = JSON.parse(localStorage.getItem("requisicoes") || "[]");
-
-  if (requisicaoEditIndex !== null) {
-    requisicoesSalvas[requisicaoEditIndex] = {
-      ...requisicoesSalvas[requisicaoEditIndex],
-      obra: obra.codigo,
-      data: new Date().toLocaleString(),
-      itens: [...requisicaoAtual],
-    };
-    alert(`Requisição ${requisicoesSalvas[requisicaoEditIndex].codigo} atualizada com sucesso!`);
-    requisicaoEditIndex = null;
-  } else {
-    const codigoRequisicao = `RM-${obra.codigo}-${String(requisicoesSalvas.length + 1).padStart(4, "0")}`;
-    const novaReq = {
-      codigo: codigoRequisicao,
-      obra: obra.codigo,
-      data: new Date().toLocaleString(),
-      itens: [...requisicaoAtual],
-    };
-    requisicoesSalvas.push(novaReq);
-    alert(`Requisição ${codigoRequisicao} salva com sucesso!`);
+  function renderUsers() {
+    users = getUsers();
+    userTable.innerHTML = "";
+    users.forEach((user, index) => {
+      userTable.innerHTML += `
+        <tr>
+          <td>${user.username}</td>
+          <td>${user.role}</td>
+          <td>
+            <button onclick="editUser(${index})">Editar</button>
+            <button onclick="deleteUser(${index})">Excluir</button>
+          </td>
+        </tr>
+      `;
+    });
   }
 
-  localStorage.setItem("requisicoes", JSON.stringify(requisicoesSalvas));
-  requisicaoAtual = [];
-  renderTabelaRequisicao();
-  showTab("historico");
+  window.editUser = function(index) {
+    const user = users[index];
+    document.getElementById("editIndex").value = index;
+    document.getElementById("editUsername").value = user.username;
+    document.getElementById("editPassword").value = user.password;
+    document.getElementById("editRole").value = user.role;
+    editForm.style.display = "block";
+  };
+
+  window.deleteUser = function(index) {
+    const auth = getAuth();
+    if (users[index].username === auth.username) {
+      alert("Você não pode excluir seu próprio usuário.");
+      return;
+    }
+    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+      users.splice(index, 1);
+      setUsers(users);
+      renderUsers();
+    }
+  };
+
+  editForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const index = parseInt(document.getElementById("editIndex").value);
+    const username = document.getElementById("editUsername").value.trim();
+    const password = document.getElementById("editPassword").value;
+    const role = document.getElementById("editRole").value;
+
+    if (!username || !password) {
+      alert("Preencha usuário e senha.");
+      return;
+    }
+
+    if (users.some((u, i) => u.username === username && i !== index)) {
+      alert("Já existe um usuário com esse nome.");
+      return;
+    }
+
+    users[index] = { username, password, role };
+    setUsers(users);
+    editForm.reset();
+    editForm.style.display = "none";
+    renderUsers();
+  });
+
+  renderUsers();
 }
 
-function renderHistorico() {
-  const div = document.getElementById("historicoRequisicoes");
-  let requisicoesSalvas = JSON.parse(localStorage.getItem("requisicoes") || "[]");
-  if (requisicoesSalvas.length === 0) {
-    div.innerHTML = "<p>Nenhuma requisição salva.</p>";
-    return;
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("btnLogout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
   }
-  div.innerHTML = requisicoesSalvas
-    .map((r, i) => {
-      const obra = obras.find((o) => o.codigo === r.obra);
-      const nomeObra = obra ? obra.nome : r.obra;
-      return `
-      <div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #fff;">
-        <strong>${r.codigo}</strong> - <em>${nomeObra}</em> - <small>${r.data}</small>
-        <button class="small" onclick="editarRequisicao(${i})">Editar</button>
-        <ul>
-          ${r.itens.map((item) => `<li>${item.quantidade} ${item.unidade} - ${item.descricao}</li>`).join("")}
-        </ul>
-      </div>`;
-    })
-    .join("");
-}
 
-function editarRequisicao(index) {
-  let requisicoesSalvas = JSON.parse(localStorage.getItem("requisicoes") || "[]");
-  const req = requisicoesSalvas[index];
-  if (!req) {
-    alert("Requisição não encontrada.");
-    return;
+  if (document.getElementById("loginForm")) {
+    setupLogin();
   }
-  requisicaoEditIndex = index;
-  const obraIndex = obras.findIndex((o) => o.codigo === req.obra);
-  if (obraIndex === -1) {
-    alert("Obra da requisição não encontrada.");
-    return;
-  }
-  document.getElementById("obraSelect").value = obraIndex;
-  requisicaoAtual = [...req.itens];
-  renderTabelaRequisicao();
-  showTab("requisicao");
-}
 
-// Inicialização
-renderSelectObras();
-renderSelectMateriais();
-renderObras();
-renderMateriais();
+  if (document.getElementById("registerForm")) {
+    setupRegister();
+  }
+
+  if (document.body.classList.contains("page-index")) {
+    protectPage("user");
+  }
+  if (document.body.classList.contains("page-admin")) {
+    protectPage("admin");
+    setupAdminPanel();
+  }
+});
