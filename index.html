@@ -1,14 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Click Suply</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Click Suply – Requisição de Materiais</h1>
-  <div id="app"></div>
+  <div id="app">
+    <h1>Click Suply</h1>
+    <div>
+      <label>Obra:</label>
+      <input id="obra" type="text" placeholder="Código da Obra (ex: OB-001)" />
+      <button onclick="gerarRequisicao()">Nova Requisição</button>
+    </div>
+    <hr />
+    <div>
+      <label>Descrição:</label><input id="descricao" type="text" />
+      <label>Quantidade:</label><input id="quantidade" type="number" />
+      <label>Unidade:</label><input id="unidade" type="text" />
+      <button onclick="adicionarItem()">Adicionar</button>
+    </div>
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Quantidade</th>
+          <th>Unidade</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="exportar()">Exportar TXT</button>
+    <button onclick="exportarCSV()">Exportar CSV</button>
+    <pre id="output"></pre>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
