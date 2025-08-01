@@ -1,3 +1,8 @@
+<script>
+  if (localStorage.getItem("auth") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -66,3 +71,11 @@
   <script src="script.js"></script>
 </body>
 </html>
+<button onclick="logout()">Sair</button>
+
+<script>
+  function logout() {
+    localStorage.removeItem("auth");
+    window.location.href = "login.html";
+  }
+</script>
