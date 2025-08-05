@@ -547,3 +547,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+function mostrarAba(id) {
+  const abas = document.querySelectorAll(".aba");
+  abas.forEach(aba => {
+    aba.style.display = "none";
+  });
+
+  const abaAtiva = document.getElementById(id);
+  if (abaAtiva) {
+    abaAtiva.style.display = "block";
+  }
+}
