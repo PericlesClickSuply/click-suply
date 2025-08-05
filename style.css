@@ -372,3 +372,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+nav {
+  margin-bottom: 1rem;
+}
+
+nav button {
+  margin-right: 8px;
+  padding: 8px 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.aba {
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
