@@ -2,6 +2,57 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <title>Click Suply - Usuário</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-index">
+  <h1>Bem-vindo ao Click Suply - Usuário</h1>
+  <button id="btnLogout">Sair</button>
+
+  <div id="app">
+    <div>
+      <label for="obra">Obra:</label>
+      <input id="obra" type="text" placeholder="Código da Obra (ex: OB-001)" />
+      <button onclick="gerarRequisicao()">Nova Requisição</button>
+    </div>
+
+    <hr />
+
+    <div>
+      <label for="descricao">Descrição:</label>
+      <input id="descricao" type="text" />
+      <label for="quantidade">Quantidade:</label>
+      <input id="quantidade" type="number" min="1" />
+      <label for="unidade">Unidade:</label>
+      <input id="unidade" type="text" />
+      <button onclick="adicionarItem()">Adicionar</button>
+    </div>
+
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Quantidade</th>
+          <th>Unidade</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button onclick="exportar()">Exportar TXT</button>
+    <button onclick="exportarCSV()">Exportar CSV</button>
+
+    <pre id="output"></pre>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Click Suply</title>
   <link rel="stylesheet" href="style.css">
